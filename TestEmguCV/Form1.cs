@@ -26,6 +26,7 @@ namespace TestEmguCV
         {
             try
             {
+
                 DialogResult res = openFileDialog1.ShowDialog();
 
                 if(res == DialogResult.OK)
