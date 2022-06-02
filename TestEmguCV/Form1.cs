@@ -15,7 +15,10 @@ namespace TestEmguCV
 {
     public partial class Form1 : Form
     {
-        private static CascadeClassifier classifier = new CascadeClassifier("haarcascade_frontalface_alt_tree.xml");
+        private static CascadeClassifier classifierFace = new CascadeClassifier("haarcascade_frontalface_alt_tree.xml");
+        //private static CascadeClassifier classifierFace = new CascadeClassifier("haarcascade_frontalface_default.xml"); 
+        private static CascadeClassifier classifierEye = new CascadeClassifier("haarcascade_eye_tree_eyeglasses.xml");
+        private static CascadeClassifier classifierSmile = new CascadeClassifier("haarcascade_smile.xml");
 
         public Form1()
         {
@@ -39,9 +42,13 @@ namespace TestEmguCV
 
                     Image<Bgr, byte> grayImage = new Image<Bgr, byte>(path);
 
-                    Rectangle[] faces = classifier.DetectMultiScale(grayImage, 1.4, 0);
+                    Rectangle[] faces = classifierFace.DetectMultiScale(grayImage, 1.4, 0);
 
-                    foreach(Rectangle face in faces)
+                    Rectangle[] eyes = classifierEye.DetectMultiScale(grayImage, 1.4, 0);
+
+                   // Rectangle[] smiles = classifierSmile.DetectMultiScale(grayImage, 1.4, 0);
+
+                    foreach (Rectangle face in faces )
                     {
                         using (Graphics graphics = Graphics.FromImage(bitmap))
                         {
@@ -51,6 +58,31 @@ namespace TestEmguCV
                             }
                         }
                     }
+
+                    foreach (Rectangle eye in eyes)
+                    {
+                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        {
+                            using (Pen pen = new Pen(Color.Red, 3))
+                            {
+                                graphics.DrawRectangle(pen, eye);
+                            }
+                        }
+                    }
+
+                   /* foreach (Rectangle smile in smiles)
+                    {
+                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        {
+                            using (Pen pen = new Pen(Color.Orange, 3))
+                            {
+                                graphics.DrawRectangle(pen, smile);
+                            }
+                        }
+                    }*/
+
+
+
 
                     pictureBox1.Image = bitmap;
                 }

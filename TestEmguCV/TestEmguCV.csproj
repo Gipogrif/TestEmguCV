@@ -137,6 +137,15 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <None Include="haarcascade_eye_tree_eyeglasses.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="haarcascade_smile.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="haarcascade_frontalface_default.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="x64\concrt140.dll" />
     <Content Include="x64\cublas64_11.dll" />
     <Content Include="x64\cublasLt64_11.dll" />
