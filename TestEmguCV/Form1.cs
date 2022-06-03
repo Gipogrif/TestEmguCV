@@ -8,8 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Emgu;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using Emgu.CV.Util;
+using Emgu.Util;
+using DirectShowLib;
+
+using Emgu.CV.UI;
 
 namespace TestEmguCV
 {
@@ -19,6 +25,12 @@ namespace TestEmguCV
         //private static CascadeClassifier classifierFace = new CascadeClassifier("haarcascade_frontalface_default.xml"); 
         private static CascadeClassifier classifierEye = new CascadeClassifier("haarcascade_eye_tree_eyeglasses.xml");
         private static CascadeClassifier classifierSmile = new CascadeClassifier("haarcascade_smile.xml");
+
+        private VideoCapture capture = null;
+
+        private DsDevice[] webCams = null;
+
+        private int selectedCameraId = 0;
 
         public Form1()
         {
@@ -95,6 +107,133 @@ namespace TestEmguCV
             {
                 MessageBox.Show(ex.Message, "Ошибка!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            webCams = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+
+            for (int i =0; i<webCams.Length; i++)
+            {
+                toolStripComboBox1.Items.Add(webCams[i].Name);
+            }
+        }
+
+        private void toolStripComboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            selectedCameraId = toolStripComboBox1.SelectedIndex;
+        }
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if(webCams.Length == 0)
+                {
+                    throw new Exception("Нет доступных камер");
+                }
+                else if (toolStripComboBox1.SelectedItem == null)
+                {
+                    throw new Exception("Нужно выбрать камеру");
+                }
+                else if (capture != null)
+                {
+                    capture.Start();
+                }
+                else
+                {
+                    capture = new VideoCapture(selectedCameraId);
+
+                    capture.ImageGrabbed += Capture_ImageGrabbed;
+
+                    capture.Start();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void Capture_ImageGrabbed(object sender, EventArgs e)
+        {
+            try
+            {
+                Mat m = new Mat();
+
+                capture.Retrieve(m);
+
+                pictureBox2.Image = m.ToImage<Bgr, byte>().Flip(Emgu.CV.CvEnum.FlipType.Horizontal).AsBitmap();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if(capture != null)
+                {
+                    capture.Pause();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+        }
+
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (capture != null)
+                {
+                    capture.Pause();
+
+                    capture.Dispose();
+
+                    capture = null;
+
+                    pictureBox2.Image.Dispose();
+
+                    pictureBox2.Image = null;
+
+                    selectedCameraId = 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void toolStripButton4_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Mat m = new Mat();
+
+                capture.Retrieve(m);
+
+                MakeScreenShotForm makeScreenShotForm = new MakeScreenShotForm(m.ToImage<Bgr, byte>().Flip(Emgu.CV.CvEnum.FlipType.Horizontal));
+
+                makeScreenShotForm.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void выходToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
     }
 }
