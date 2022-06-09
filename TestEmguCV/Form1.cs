@@ -6,11 +6,13 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 
 using Emgu;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using Emgu.CV.CvEnum;
 using Emgu.CV.Util;
 using Emgu.Util;
 using DirectShowLib;
@@ -50,7 +52,7 @@ namespace TestEmguCV
 
                     pictureBox1.Image = Image.FromFile(path);
 
-                    Bitmap bitmap = new Bitmap(pictureBox1.Image);
+                    Bitmap bitmap1 = new Bitmap(pictureBox1.Image);
 
                     Image<Bgr, byte> grayImage = new Image<Bgr, byte>(path);
 
@@ -58,11 +60,11 @@ namespace TestEmguCV
 
                     Rectangle[] eyes = classifierEye.DetectMultiScale(grayImage, 1.4, 0);
 
-                   // Rectangle[] smiles = classifierSmile.DetectMultiScale(grayImage, 1.4, 0);
+                    //Rectangle[] smiles = classifierSmile.DetectMultiScale(grayImage, 1.4, 0);
 
                     foreach (Rectangle face in faces )
                     {
-                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        using (Graphics graphics = Graphics.FromImage(bitmap1))
                         {
                             using (Pen pen = new Pen(Color.Yellow, 3))
                             {
@@ -73,7 +75,7 @@ namespace TestEmguCV
 
                     foreach (Rectangle eye in eyes)
                     {
-                        using (Graphics graphics = Graphics.FromImage(bitmap))
+                        using (Graphics graphics = Graphics.FromImage(bitmap1))
                         {
                             using (Pen pen = new Pen(Color.Red, 3))
                             {
@@ -96,7 +98,7 @@ namespace TestEmguCV
 
 
 
-                    pictureBox1.Image = bitmap;
+                    pictureBox1.Image = bitmap1;
                 }
                 else
                 {
@@ -163,7 +165,37 @@ namespace TestEmguCV
 
                 capture.Retrieve(m);
 
-                pictureBox2.Image = m.ToImage<Bgr, byte>().Flip(Emgu.CV.CvEnum.FlipType.Horizontal).AsBitmap();
+                Bitmap bitmap = new Bitmap(m.ToImage<Bgr, byte>().Flip(Emgu.CV.CvEnum.FlipType.Horizontal).AsBitmap());
+
+                Image<Bgr, byte> grayImage = m.ToImage<Bgr, byte>().Convert<Bgr, byte>().Flip(Emgu.CV.CvEnum.FlipType.Horizontal); 
+
+                Rectangle[] faces = classifierFace.DetectMultiScale(grayImage, 1.4, 0);
+
+                Rectangle[] eyes = classifierEye.DetectMultiScale(grayImage, 1.4, 0);
+
+                foreach (Rectangle face in faces)
+                {
+                    using (Graphics graphics = Graphics.FromImage(bitmap))
+                    {
+                        using (Pen pen = new Pen(Color.Yellow, 3))
+                        {
+                            graphics.DrawRectangle(pen, face);
+                        }
+                    }
+                }
+
+                foreach (Rectangle eye in eyes)
+                {
+                    using (Graphics graphics = Graphics.FromImage(bitmap))
+                    {
+                        using (Pen pen = new Pen(Color.Red, 3))
+                        {
+                            graphics.DrawRectangle(pen, eye);
+                        }
+                    }
+                }
+
+                pictureBox2.Image = bitmap;
 
             }
             catch (Exception ex)
